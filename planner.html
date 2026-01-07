@@ -1,0 +1,903 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Gen’s Planner ✨ 2026</title>
+
+  <!--
+    Gen’s Planner ✨ 2026
+    Cute, aesthetic, responsive budgeting and savings planner
+    Tech: HTML + CSS + JavaScript (LocalStorage for persistence)
+    Author notes:
+    - Single-file project with embedded CSS & JS
+    - Beginner-friendly, clean comments
+    - Real-time calculations, monthly summaries, progress bars
+    - Toggle Saving Mode / Payment Mode
+    - Monthly reset, success message when goal achieved
+  -->
+
+  <style>
+    /* ------------------------------
+       Base & Theme
+    ------------------------------ */
+    :root {
+      --bg: #fffaf7;
+      --card: #ffffff;
+      --text: #4b4b4b;
+      --muted: #7a7a7a;
+      --accent-pink: #f7b7d2;
+      --accent-lavender: #c9b7f7;
+      --accent-mint: #b7f7d9;
+      --accent-cream: #fff0d6;
+      --shadow: 0 8px 24px rgba(0,0,0,0.08);
+      --radius: 16px;
+      --radius-sm: 12px;
+      --radius-xs: 8px;
+      --focus: #ff8fb1;
+      --warning: #ffb3b3;
+      --success: #b8f2c9;
+    }
+
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(180deg, var(--bg), #fff);
+      color: var(--text);
+      font-family: "Nunito", "Poppins", "Segoe UI", system-ui, -apple-system, sans-serif;
+    }
+
+    /* ------------------------------
+       Header
+    ------------------------------ */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: linear-gradient(90deg, var(--accent-cream), var(--accent-pink), var(--accent-lavender));
+      padding: 18px 16px;
+      box-shadow: var(--shadow);
+    }
+    .header-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      justify-content: space-between;
+    }
+    .title {
+      font-size: 1.6rem;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      color: #4a3b4f;
+    }
+    .subtitle {
+      font-size: 0.95rem;
+      color: #5b4f5f;
+    }
+
+    /* Mode toggle */
+    .mode-toggle {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--card);
+      padding: 8px 12px;
+      border-radius: var(--radius-sm);
+      box-shadow: var(--shadow);
+    }
+    .toggle-label {
+      font-weight: 700;
+      color: #5b4f5f;
+    }
+    .toggle-group {
+      display: inline-flex;
+      border-radius: 999px;
+      overflow: hidden;
+      border: 1px solid #eee;
+      background: #f9f9f9;
+    }
+    .toggle-btn {
+      padding: 8px 12px;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      font-weight: 700;
+      color: #6a5f73;
+      transition: background 0.2s ease, color 0.2s ease;
+    }
+    .toggle-btn.active {
+      background: var(--accent-mint);
+      color: #2f5b4f;
+    }
+
+    /* ------------------------------
+       Container & Month Cards
+    ------------------------------ */
+    .container {
+      max-width: 1100px;
+      margin: 24px auto;
+      padding: 0 16px;
+    }
+
+    .month-card {
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      margin-bottom: 24px;
+      overflow: hidden;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .month-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 28px rgba(0,0,0,0.12);
+    }
+
+    .month-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px;
+      background: linear-gradient(90deg, var(--accent-cream), var(--accent-mint));
+    }
+    .month-title {
+      font-size: 1.2rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .month-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .reset-btn {
+      background: var(--accent-pink);
+      color: #4b2b3b;
+      border: none;
+      padding: 8px 12px;
+      border-radius: var(--radius-xs);
+      cursor: pointer;
+      font-weight: 700;
+      transition: transform 0.1s ease, opacity 0.2s ease;
+    }
+    .reset-btn:hover { transform: translateY(-1px); opacity: 0.9; }
+
+    .collapse-btn {
+      background: var(--accent-lavender);
+      color: #2f2b4b;
+      border: none;
+      padding: 8px 12px;
+      border-radius: var(--radius-xs);
+      cursor: pointer;
+      font-weight: 700;
+      transition: transform 0.1s ease, opacity 0.2s ease;
+    }
+    .collapse-btn:hover { transform: translateY(-1px); opacity: 0.9; }
+
+    /* ------------------------------
+       Calendar Grid
+    ------------------------------ */
+    .calendar {
+      padding: 16px;
+    }
+    .weekday-row {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 8px;
+      margin-bottom: 8px;
+      color: var(--muted);
+      font-weight: 700;
+      font-size: 0.9rem;
+    }
+    .day-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 8px;
+    }
+    .day-cell {
+      background: #fffdfb;
+      border: 1px solid #f1e9e0;
+      border-radius: var(--radius-sm);
+      padding: 8px;
+      min-height: 120px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      position: relative;
+      transition: box-shadow 0.2s ease, transform 0.2s ease;
+    }
+    .day-cell:hover {
+      box-shadow: var(--shadow);
+      transform: translateY(-1px);
+    }
+    .day-number {
+      font-weight: 800;
+      color: #6a5f73;
+    }
+    .amount-input {
+      width: 100%;
+      padding: 8px;
+      border-radius: var(--radius-xs);
+      border: 1px solid #e9dfe0;
+      background: #fff;
+      outline: none;
+      transition: border 0.2s ease, box-shadow 0.2s ease;
+    }
+    .amount-input:focus {
+      border-color: var(--focus);
+      box-shadow: 0 0 0 3px rgba(255,143,177,0.2);
+    }
+    .note-input {
+      width: 100%;
+      padding: 6px 8px;
+      border-radius: var(--radius-xs);
+      border: 1px dashed #e9dfe0;
+      background: #fff;
+      font-size: 0.85rem;
+      outline: none;
+      transition: border 0.2s ease, box-shadow 0.2s ease;
+    }
+    .note-input:focus {
+      border-color: var(--accent-lavender);
+      box-shadow: 0 0 0 3px rgba(201,183,247,0.2);
+    }
+    .soft-reminder {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      font-size: 0.75rem;
+      background: #fff7f7;
+      color: #a34b4b;
+      padding: 4px 6px;
+      border-radius: 999px;
+      border: 1px solid #ffd6d6;
+      display: none;
+    }
+    .day-cell.skipped .soft-reminder { display: inline-block; }
+
+    /* ------------------------------
+       Monthly Summary
+    ------------------------------ */
+    .summary {
+      padding: 16px;
+      border-top: 1px dashed #f0e6e0;
+      background: #fffefb;
+    }
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+    .summary-item {
+      background: #ffffff;
+      border: 1px solid #f1e9e0;
+      border-radius: var(--radius-sm);
+      padding: 12px;
+      box-shadow: var(--shadow);
+    }
+    .summary-label {
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+    .summary-value {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: #4b3b5f;
+    }
+
+    .budget-input {
+      width: 100%;
+      padding: 8px;
+      border-radius: var(--radius-xs);
+      border: 1px solid #e9dfe0;
+      background: #fff;
+      outline: none;
+    }
+
+    .progress-wrap {
+      margin-top: 12px;
+    }
+    .progress-bar {
+      width: 100%;
+      height: 14px;
+      background: #f3eef7;
+      border-radius: 999px;
+      overflow: hidden;
+      border: 1px solid #e6dff2;
+    }
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--accent-pink), var(--accent-lavender));
+      transition: width 0.4s ease;
+    }
+    .progress-text {
+      margin-top: 6px;
+      font-size: 0.9rem;
+      color: #6a5f73;
+      font-weight: 700;
+    }
+
+    .warning {
+      margin-top: 8px;
+      background: var(--warning);
+      color: #5a2b2b;
+      padding: 8px 10px;
+      border-radius: var(--radius-xs);
+      display: none;
+      font-weight: 700;
+    }
+    .warning.show { display: block; }
+
+    .success {
+      margin-top: 8px;
+      background: var(--success);
+      color: #1f4b36;
+      padding: 8px 10px;
+      border-radius: var(--radius-xs);
+      display: none;
+      font-weight: 700;
+    }
+    .success.show { display: block; }
+
+    /* ------------------------------
+       Footer
+    ------------------------------ */
+    footer {
+      text-align: center;
+      padding: 24px 16px;
+      color: var(--muted);
+    }
+
+    /* ------------------------------
+       Responsiveness
+    ------------------------------ */
+    @media (max-width: 900px) {
+      .summary-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    @media (max-width: 640px) {
+      .weekday-row, .day-grid {
+        grid-template-columns: repeat(7, minmax(40px, 1fr));
+      }
+      .month-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+      }
+      .month-actions {
+        width: 100%;
+        justify-content: flex-start;
+        flex-wrap: wrap;
+      }
+    }
+    @media (max-width: 480px) {
+      .summary-grid {
+        grid-template-columns: 1fr;
+      }
+      .day-cell {
+        min-height: 110px;
+      }
+    }
+
+    /* ------------------------------
+       Light hover animations
+    ------------------------------ */
+    .amount-input:hover,
+    .note-input:hover,
+    .budget-input:hover {
+      background: #fffdfd;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <div class="header-inner">
+      <div>
+        <div class="title">Gen’s Planner ✨ 2026</div>
+        <div class="subtitle">💖 Cozy calendar-based budgeting & savings diary</div>
+      </div>
+
+      <!-- Saving/Payment Mode Toggle -->
+      <div class="mode-toggle" aria-label="Mode toggle">
+        <span class="toggle-label">Mode:</span>
+        <div class="toggle-group" role="tablist" aria-label="Saving or Payment mode">
+          <button class="toggle-btn active" id="mode-saving" aria-selected="true">Saving Mode</button>
+          <button class="toggle-btn" id="mode-payment" aria-selected="false">Payment Mode</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="container" id="plannerContainer">
+    <!-- Months will be injected here by JavaScript -->
+  </main>
+
+  <footer>
+    🌸 Made with care for Gen — keep going, you’re building something beautiful.
+  </footer>
+
+  <script>
+    /* ============================================================
+       Gen’s Planner ✨ 2026 — JavaScript
+       - Generates 2026 calendar
+       - LocalStorage persistence
+       - Real-time monthly totals, budget, remaining spendable
+       - Progress bar toward monthly budget goal
+       - Warnings on budget exceed & soft reminders for skipped days
+       - Saving Mode / Payment Mode toggle
+       - Monthly reset & success message
+    ============================================================ */
+
+    // ------------------------------
+    // Constants & State
+    // ------------------------------
+    const YEAR = 2026;
+    const MONTH_NAMES = [
+      "January", "February", "March", "April", "May", "June",
+      "July", "August", "September", "October", "November", "December"
+    ];
+    const WEEKDAY_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+    // App mode: "saving" or "payment"
+    let currentMode = "saving";
+
+    // LocalStorage keys
+    const LS_KEY_ENTRIES = "gensPlanner_entries_2026";
+    const LS_KEY_BUDGETS = "gensPlanner_budgets_2026";
+    const LS_KEY_NOTES   = "gensPlanner_notes_2026";
+
+    // In-memory cache (synced with LocalStorage)
+    let entries = loadLS(LS_KEY_ENTRIES) || {}; // { "month-day": { amount: number, mode: "saving"|"payment" } }
+    let budgets = loadLS(LS_KEY_BUDGETS) || {}; // { "month": number }
+    let notes   = loadLS(LS_KEY_NOTES)   || {}; // { "month-day": string }
+
+    // ------------------------------
+    // Utilities: LocalStorage
+    // ------------------------------
+    function loadLS(key) {
+      try {
+        const raw = localStorage.getItem(key);
+        return raw ? JSON.parse(raw) : null;
+      } catch (e) {
+        console.warn("LocalStorage load error:", e);
+        return null;
+      }
+    }
+    function saveLS(key, value) {
+      try {
+        localStorage.setItem(key, JSON.stringify(value));
+      } catch (e) {
+        console.warn("LocalStorage save error:", e);
+      }
+    }
+
+    // ------------------------------
+    // Mode Toggle
+    // ------------------------------
+    const modeSavingBtn = document.getElementById("mode-saving");
+    const modePaymentBtn = document.getElementById("mode-payment");
+
+    modeSavingBtn.addEventListener("click", () => {
+      currentMode = "saving";
+      modeSavingBtn.classList.add("active");
+      modePaymentBtn.classList.remove("active");
+      modeSavingBtn.setAttribute("aria-selected", "true");
+      modePaymentBtn.setAttribute("aria-selected", "false");
+      // Optional: subtle feedback
+      toast("🌱 Saving Mode — plan your savings day by day.");
+    });
+
+    modePaymentBtn.addEventListener("click", () => {
+      currentMode = "payment";
+      modePaymentBtn.classList.add("active");
+      modeSavingBtn.classList.remove("active");
+      modePaymentBtn.setAttribute("aria-selected", "true");
+      modeSavingBtn.setAttribute("aria-selected", "false");
+      toast("💸 Payment Mode — track your payments with care.");
+    });
+
+    // ------------------------------
+    // Calendar Generation
+    // ------------------------------
+    const plannerContainer = document.getElementById("plannerContainer");
+
+    // Build all months
+    MONTH_NAMES.forEach((monthName, monthIndex) => {
+      const monthCard = createMonthCard(monthName, monthIndex);
+      plannerContainer.appendChild(monthCard);
+    });
+
+    // ------------------------------
+    // Create Month Card
+    // ------------------------------
+    function createMonthCard(monthName, monthIndex) {
+      const monthCard = document.createElement("section");
+      monthCard.className = "month-card";
+      monthCard.setAttribute("data-month-index", monthIndex);
+
+      // Header
+      const header = document.createElement("div");
+      header.className = "month-header";
+
+      const title = document.createElement("div");
+      title.className = "month-title";
+      title.innerHTML = `📅 ${monthName} ${YEAR}`;
+
+      const actions = document.createElement("div");
+      actions.className = "month-actions";
+
+      const resetBtn = document.createElement("button");
+      resetBtn.className = "reset-btn";
+      resetBtn.textContent = "Reset Month";
+      resetBtn.addEventListener("click", () => resetMonth(monthIndex));
+
+      const collapseBtn = document.createElement("button");
+      collapseBtn.className = "collapse-btn";
+      collapseBtn.textContent = "Collapse";
+      collapseBtn.addEventListener("click", () => {
+        calendarWrap.classList.toggle("hidden");
+        summary.classList.toggle("hidden");
+        collapseBtn.textContent = calendarWrap.classList.contains("hidden") ? "Expand" : "Collapse";
+      });
+
+      actions.appendChild(resetBtn);
+      actions.appendChild(collapseBtn);
+
+      header.appendChild(title);
+      header.appendChild(actions);
+
+      // Calendar
+      const calendarWrap = document.createElement("div");
+      calendarWrap.className = "calendar";
+
+      const weekdayRow = document.createElement("div");
+      weekdayRow.className = "weekday-row";
+      WEEKDAY_NAMES.forEach(w => {
+        const wd = document.createElement("div");
+        wd.textContent = w;
+        weekdayRow.appendChild(wd);
+      });
+
+      const dayGrid = document.createElement("div");
+      dayGrid.className = "day-grid";
+
+      // Generate days for this month
+      const firstDay = new Date(YEAR, monthIndex, 1);
+      const lastDay = new Date(YEAR, monthIndex + 1, 0);
+      const startWeekday = firstDay.getDay(); // 0-6
+      const totalDays = lastDay.getDate();
+
+      // Fill leading blanks
+      for (let i = 0; i < startWeekday; i++) {
+        const blank = document.createElement("div");
+        blank.className = "day-cell";
+        blank.style.visibility = "hidden";
+        dayGrid.appendChild(blank);
+      }
+
+      // Create day cells
+      for (let day = 1; day <= totalDays; day++) {
+        const cell = createDayCell(monthIndex, day);
+        dayGrid.appendChild(cell);
+      }
+
+      calendarWrap.appendChild(weekdayRow);
+      calendarWrap.appendChild(dayGrid);
+
+      // Summary
+      const summary = createMonthlySummary(monthIndex);
+
+      // Assemble
+      monthCard.appendChild(header);
+      monthCard.appendChild(calendarWrap);
+      monthCard.appendChild(summary);
+
+      // Initial compute
+      updateMonthlySummary(monthIndex);
+
+      return monthCard;
+    }
+
+    // ------------------------------
+    // Create Day Cell
+    // ------------------------------
+    function createDayCell(monthIndex, day) {
+      const key = `${monthIndex}-${day}`;
+      const cell = document.createElement("div");
+      cell.className = "day-cell";
+
+      const dayNumber = document.createElement("div");
+      dayNumber.className = "day-number";
+      dayNumber.textContent = day;
+
+      const amountInput = document.createElement("input");
+      amountInput.className = "amount-input";
+      amountInput.type = "number";
+      amountInput.min = "0";
+      amountInput.step = "0.01";
+      amountInput.placeholder = currentMode === "saving" ? "Amount to save" : "Amount to pay";
+
+      // Load existing entry
+      if (entries[key]) {
+        amountInput.value = entries[key].amount ?? "";
+      }
+
+      // Note input
+      const noteInput = document.createElement("input");
+      noteInput.className = "note-input";
+      noteInput.type = "text";
+      noteInput.placeholder = "Note (optional) 🌸";
+
+      // Load existing note
+      if (notes[key]) {
+        noteInput.value = notes[key];
+      }
+
+      // Soft reminder badge (shown when empty)
+      const reminder = document.createElement("div");
+      reminder.className = "soft-reminder";
+      reminder.textContent = "gentle nudge 💖";
+      // Initial reminder state
+      if (!amountInput.value) {
+        cell.classList.add("skipped");
+      }
+
+      // Events: amount change
+      amountInput.addEventListener("input", () => {
+        const val = parseFloat(amountInput.value);
+        if (!isNaN(val) && val >= 0) {
+          entries[key] = { amount: val, mode: currentMode };
+        } else {
+          // If cleared or invalid, remove entry
+          delete entries[key];
+        }
+        saveLS(LS_KEY_ENTRIES, entries);
+
+        // Reminder toggle
+        if (!amountInput.value) {
+          cell.classList.add("skipped");
+        } else {
+          cell.classList.remove("skipped");
+        }
+
+        updateMonthlySummary(monthIndex);
+      });
+
+      // Events: note change
+      noteInput.addEventListener("input", () => {
+        const text = noteInput.value.trim();
+        if (text.length) {
+          notes[key] = text;
+        } else {
+          delete notes[key];
+        }
+        saveLS(LS_KEY_NOTES, notes);
+      });
+
+      // Assemble
+      cell.appendChild(dayNumber);
+      cell.appendChild(amountInput);
+      cell.appendChild(noteInput);
+      cell.appendChild(reminder);
+
+      return cell;
+    }
+
+    // ------------------------------
+    // Monthly Summary Panel
+    // ------------------------------
+    function createMonthlySummary(monthIndex) {
+      const wrap = document.createElement("div");
+      wrap.className = "summary";
+      wrap.setAttribute("data-summary-month", monthIndex);
+
+      const grid = document.createElement("div");
+      grid.className = "summary-grid";
+
+      // Total Saved/Paid
+      const totalItem = document.createElement("div");
+      totalItem.className = "summary-item";
+      totalItem.innerHTML = `
+        <div class="summary-label">✅ Total Saved / Paid This Month</div>
+        <div class="summary-value" id="total-${monthIndex}">₱0.00</div>
+      `;
+
+      // Planned Monthly Budget
+      const budgetItem = document.createElement("div");
+      budgetItem.className = "summary-item";
+      const budgetVal = budgets[monthIndex] ?? "";
+      budgetItem.innerHTML = `
+        <div class="summary-label">💰 Planned Monthly Budget</div>
+        <input class="budget-input" id="budget-${monthIndex}" type="number" min="0" step="0.01" placeholder="Enter budget (₱)" value="${budgetVal}">
+      `;
+
+      // Remaining Spendable
+      const remainingItem = document.createElement("div");
+      remainingItem.className = "summary-item";
+      remainingItem.innerHTML = `
+        <div class="summary-label">🧮 Remaining Money You Can Spend</div>
+        <div class="summary-value" id="remaining-${monthIndex}">₱0.00</div>
+      `;
+
+      // Progress
+      const progressItem = document.createElement("div");
+      progressItem.className = "summary-item";
+      progressItem.innerHTML = `
+        <div class="summary-label">📊 Progress toward monthly goal</div>
+        <div class="progress-wrap">
+          <div class="progress-bar">
+            <div class="progress-fill" id="progress-${monthIndex}"></div>
+          </div>
+          <div class="progress-text" id="progress-text-${monthIndex}">0%</div>
+        </div>
+        <div class="warning" id="warning-${monthIndex}">⚠️ You’ve exceeded your budget—consider adjusting your plan.</div>
+        <div class="success" id="success-${monthIndex}">🎉 Sweet success! You reached your monthly goal.</div>
+      `;
+
+      grid.appendChild(totalItem);
+      grid.appendChild(budgetItem);
+      grid.appendChild(remainingItem);
+      grid.appendChild(progressItem);
+
+      wrap.appendChild(grid);
+
+      // Budget input event
+      const budgetInput = grid.querySelector(`#budget-${monthIndex}`);
+      budgetInput.addEventListener("input", () => {
+        const val = parseFloat(budgetInput.value);
+        if (!isNaN(val) && val >= 0) {
+          budgets[monthIndex] = val;
+        } else {
+          delete budgets[monthIndex];
+        }
+        saveLS(LS_KEY_BUDGETS, budgets);
+        updateMonthlySummary(monthIndex);
+      });
+
+      return wrap;
+    }
+
+    // ------------------------------
+    // Update Monthly Summary
+    // ------------------------------
+    function updateMonthlySummary(monthIndex) {
+      const totalEl = document.getElementById(`total-${monthIndex}`);
+      const remainingEl = document.getElementById(`remaining-${monthIndex}`);
+      const progressFill = document.getElementById(`progress-${monthIndex}`);
+      const progressText = document.getElementById(`progress-text-${monthIndex}`);
+      const warningEl = document.getElementById(`warning-${monthIndex}`);
+      const successEl = document.getElementById(`success-${monthIndex}`);
+      const budgetInput = document.getElementById(`budget-${monthIndex}`);
+
+      const budget = parseFloat(budgetInput.value) || 0;
+
+      // Sum entries for this month
+      let totalSaved = 0;
+      let totalPaid = 0;
+
+      const lastDay = new Date(YEAR, monthIndex + 1, 0).getDate();
+      for (let day = 1; day <= lastDay; day++) {
+        const key = `${monthIndex}-${day}`;
+        const entry = entries[key];
+        if (entry && typeof entry.amount === "number") {
+          if (entry.mode === "payment") {
+            totalPaid += entry.amount;
+          } else {
+            totalSaved += entry.amount;
+          }
+        }
+      }
+
+      // Display total saved/paid combined (as requested)
+      const totalCombined = totalSaved + totalPaid;
+      totalEl.textContent = `₱${formatCurrency(totalCombined)}`;
+
+      // Remaining Spendable = Monthly Budget − Total Saved
+      const remaining = budget - totalSaved;
+      remainingEl.textContent = `₱${formatCurrency(remaining)}`;
+
+      // Progress toward monthly goal (using savings vs budget)
+      let progress = 0;
+      if (budget > 0) {
+        progress = Math.min(100, Math.round((totalSaved / budget) * 100));
+      }
+      progressFill.style.width = `${progress}%`;
+      progressText.textContent = `${progress}%`;
+
+      // Warnings & success
+      if (budget > 0 && totalSaved > budget) {
+        warningEl.classList.add("show");
+      } else {
+        warningEl.classList.remove("show");
+      }
+
+      if (budget > 0 && totalSaved >= budget) {
+        successEl.classList.add("show");
+      } else {
+        successEl.classList.remove("show");
+      }
+    }
+
+    // ------------------------------
+    // Reset Month
+    // ------------------------------
+    function resetMonth(monthIndex) {
+      if (!confirm("Reset this month? This will clear amounts and notes for all days.")) return;
+
+      const lastDay = new Date(YEAR, monthIndex + 1, 0).getDate();
+      for (let day = 1; day <= lastDay; day++) {
+        const key = `${monthIndex}-${day}`;
+        delete entries[key];
+        delete notes[key];
+      }
+      saveLS(LS_KEY_ENTRIES, entries);
+      saveLS(LS_KEY_NOTES, notes);
+
+      // Clear inputs in UI
+      const monthCard = document.querySelector(`.month-card[data-month-index="${monthIndex}"]`);
+      const inputs = monthCard.querySelectorAll(".amount-input");
+      const noteInputs = monthCard.querySelectorAll(".note-input");
+      inputs.forEach(inp => { inp.value = ""; inp.dispatchEvent(new Event("input")); });
+      noteInputs.forEach(inp => { inp.value = ""; inp.dispatchEvent(new Event("input")); });
+
+      toast("🧼 Month reset — fresh start!");
+      updateMonthlySummary(monthIndex);
+    }
+
+    // ------------------------------
+    // Helpers
+    // ------------------------------
+    function formatCurrency(num) {
+      return (num || 0).toLocaleString("en-PH", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    // Simple toast (non-blocking, ephemeral)
+    function toast(message) {
+      const t = document.createElement("div");
+      t.textContent = message;
+      t.style.position = "fixed";
+      t.style.bottom = "20px";
+      t.style.right = "20px";
+      t.style.background = "#ffffff";
+      t.style.border = "1px solid #f1e9e0";
+      t.style.boxShadow = "0 8px 24px rgba(0,0,0,0.12)";
+      t.style.borderRadius = "12px";
+      t.style.padding = "10px 12px";
+      t.style.zIndex = "9999";
+      t.style.fontWeight = "800";
+      t.style.color = "#4b3b5f";
+      t.style.transition = "opacity 0.3s ease, transform 0.3s ease";
+      document.body.appendChild(t);
+      setTimeout(() => { t.style.opacity = "0"; t.style.transform = "translateY(6px)"; }, 1500);
+      setTimeout(() => { t.remove(); }, 2000);
+    }
+
+    // ------------------------------
+    // Accessibility niceties
+    // ------------------------------
+    // Update placeholders when mode changes (for new inputs)
+    const observer = new MutationObserver(() => {
+      document.querySelectorAll(".amount-input").forEach(inp => {
+        if (!inp.value) {
+          inp.placeholder = currentMode === "saving" ? "Amount to save" : "Amount to pay";
+        }
+      });
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+
+  </script>
+</body>
+</html>
+```
