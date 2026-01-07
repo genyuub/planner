@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Gen’s Planner ✨ 2026</title>
+  <style>
+    /* --------- Base & Theme --------- */
+    :root {
+      --bg: #fffaf7;
+      --card: #fffdfb;
+      --pink: #f7b7c9;
+      --lavender: #c9b7f7;
+      --mint: #b7f7d4;
+      --cream: #fff1e6;
+      --text: #4b3f4a;
+      --muted: #7a6b78;
+      --accent: #ff9ec7;
+      --shadow: 0 10px 25px rgba(0,0,0,0.08);
+      --radius: 18px;
+      --radius-sm: 12px;
+      --radius-xs: 10px;
+      --focus: 0 0 0 3px rgba(255, 158, 199, 0.35);
+    }
+
+    @font-face {
+      font-family: "NunitoRounded";
+      src: local("Nunito"), local("Nunito Rounded");
+      font-display: swap;
+    }
+
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(180deg, var(--bg), #fff);
+      color: var(--text);
+      font-family: "NunitoRounded", ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial;
+    }
+
+    /* --------- Header --------- */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: linear-gradient(90deg, var(--cream), #fef6ff);
+      border-bottom: 1px solid #f3e7e1;
+      backdrop-filter: blur(6px);
+    }
+    .header-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 18px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .brand {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+    }
+    .brand h1 {
+      margin: 0;
+      font-size: 1.6rem;
+      letter-spacing: 0.4px;
+      color: #5a4a5f;
+    }
+    .brand .year-pill {
+      background: #ffe7f1;
+      color: #7a5a6a;
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-weight: 700;
+      box-shadow: var(--shadow);
+    }
+    .header-actions {
+      display: flex;
+      gap: 10px;
+    }
+    .btn {
+      border: none;
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      font-weight: 700;
+      color: #5a4a5f;
+      background: #f9e9ff;
+      box-shadow: var(--shadow);
+      cursor: pointer;
+      transition: transform 0.08s ease, box-shadow 0.2s ease, background 0.2s ease;
+    }
+    .btn:hover { transform: translateY(-1px); }
+    .btn:active { transform: translateY(0); }
+    .btn.pink { background: #ffe3ee; }
+    .btn.mint { background: #eafff4; }
+    .btn.lavender { background: #efe7ff; }
+    .btn:focus-visible { outline: none; box-shadow: var(--focus); }
+
+    /* --------- Container --------- */
+    .container {
+      max-width: 1100px;
+      margin: 24px auto 80px;
+      padding: 0 20px;
+    }
+
+    /* --------- Intro --------- */
+    .intro {
+      background: linear-gradient(180deg, #fff, var(--cream));
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 18px;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+    .intro p {
+      margin: 0;
+      color: var(--muted);
+    }
+
+    /* --------- Month Section --------- */
+    .month {
+      margin-top: 22px;
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      border: 1px solid #f3e7e1;
+    }
+    .month-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 16px;
+      background: linear-gradient(90deg, #fff, #fff7fb);
+      border-bottom: 1px solid #f3e7e1;
+    }
+    .month-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .month-title h2 {
+      margin: 0;
+      font-size: 1.25rem;
+      color: #5a4a5f;
+    }
+    .month-badge {
+      background: #fff0f6;
+      color: #7a5a6a;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-weight: 700;
+      font-size: 0.85rem;
+      box-shadow: var(--shadow);
+    }
+
+    /* --------- Calendar Grid --------- */
+    .calendar {
+      padding: 14px;
+    }
+    .weekday-row {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    .weekday {
+      text-align: center;
+      font-weight: 800;
+      color: #8a7a88;
+      background: #fff6fb;
+      border-radius: var(--radius-xs);
+      padding: 8px 0;
+      border: 1px dashed #f0d9e4;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 8px;
+    }
+    .day {
+      background: #ffffff;
+      border: 1px solid #f1e6e0;
+      border-radius: var(--radius-xs);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      padding: 10px;
+      min-height: 120px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      position: relative;
+      transition: transform 0.08s ease, box-shadow 0.2s ease;
+    }
+    .day:hover { transform: translateY(-1px); box-shadow: 0 8px 18px rgba(0,0,0,0.07); }
+    .day.inactive { background: #faf7f5; opacity: 0.65; }
+    .day .date {
+      font-weight: 800;
+      color: #7a5a6a;
+      background: #fff0f6;
+      border: 1px dashed #f0d9e4;
+      border-radius: 999px;
+      padding: 4px 8px;
+      display: inline-block;
+      font-size: 0.85rem;
+    }
+    .input-row {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 6px;
+    }
+    .amount {
+      width: 100%;
+      border: 1px solid #f0d9e4;
+      border-radius: 12px;
+      padding: 8px 10px;
+      font-weight: 700;
+      color: #5a4a5f;
+      background: #fff7fb;
+      transition: box-shadow 0.2s ease, border-color 0.2s ease;
+    }
+    .amount:focus-visible { outline: none; box-shadow: var(--focus); border-color: var(--accent); }
+    .note {
+      width: 100%;
+      border: 1px dashed #e8d7e0;
+      border-radius: 12px;
+      padding: 7px 10px;
+      font-size: 0.85rem;
+      color: #7a6b78;
+      background: #fffefc;
+      transition: box-shadow 0.2s ease, border-color 0.2s ease;
+    }
+    .note:focus-visible { outline: none; box-shadow: var(--focus); border-color: var(--accent); }
+
+    /* --------- Monthly Planner --------- */
+    .planner {
+      padding: 16px;
+      border-top: 1px solid #f3e7e1;
+      background: linear-gradient(180deg, #fff, #fff8fb);
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 16px;
+    }
+    .planner-card {
+      background: #ffffff;
+      border: 1px solid #f1e6e0;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 14px;
+    }
+    .planner-card h3 {
+      margin: 0 0 10px;
+      font-size: 1.05rem;
+      color: #5a4a5f;
+    }
+    .planner-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+    .label {
+      font-weight: 800;
+      color: #7a5a6a;
+      font-size: 0.9rem;
+    }
+    .value, .planner-input {
+      background: #fffefc;
+      border: 1px solid #f0d9e4;
+      border-radius: 12px;
+      padding: 10px 12px;
+      font-weight: 700;
+      color: #5a4a5f;
+    }
+    .planner-input:focus-visible { outline: none; box-shadow: var(--focus); border-color: var(--accent); }
+
+    /* --------- Progress --------- */
+    .progress-wrap {
+      margin-top: 8px;
+    }
+    .progress-bar {
+      width: 100%;
+      height: 14px;
+      background: #f7eaf1;
+      border-radius: 999px;
+      overflow: hidden;
+      border: 1px solid #f0d9e4;
+      box-shadow: inset 0 2px 6px rgba(0,0,0,0.06);
+    }
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--pink), var(--lavender), var(--mint));
+      border-radius: 999px;
+      transition: width 0.5s ease;
+    }
+    .progress-text {
+      margin-top: 8px;
+      font-size: 0.9rem;
+      color: #7a6b78;
+      font-weight: 700;
+    }
+
+    /* --------- Messages --------- */
+    .message {
+      margin-top: 10px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      font-weight: 700;
+      display: none;
+    }
+    .message.show { display: block; }
+    .message.warn {
+      background: #fff3f3;
+      color: #a14a4a;
+      border: 1px solid #ffd7d7;
+    }
+    .message.success {
+      background: #f0fff7;
+      color: #2f7a57;
+      border: 1px solid #c8f5df;
+    }
+
+    /* --------- Footer --------- */
+    footer {
+      text-align: center;
+      color: #8a7a88;
+      padding: 24px 16px 40px;
+    }
+
+    /* --------- Responsiveness --------- */
+    @media (max-width: 900px) {
+      .planner {
+        grid-template-columns: 1fr;
+      }
+    }
+    @media (max-width: 700px) {
+      .grid, .weekday-row {
+        grid-template-columns: repeat(7, minmax(90px, 1fr));
+        overflow-x: auto;
+        padding-bottom: 6px;
+      }
+      .day { min-width: 160px; }
+      .month-header { flex-wrap: wrap; }
+    }
+    @media (max-width: 480px) {
+      .day { min-width: 150px; }
+      .planner-row { grid-template-columns: 1fr; }
+      .btn { padding: 9px 12px; }
+      .brand h1 { font-size: 1.3rem; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-inner">
+      <div class="brand">
+        <h1>Gen’s Planner ✨ 2026</h1>
+        <span class="year-pill">Calendar-based budgeting & savings</span>
+      </div>
+      <div class="header-actions">
+        <button class="btn lavender" id="expandAll">Expand all</button>
+        <button class="btn mint" id="collapseAll">Collapse all</button>
+        <button class="btn pink" id="resetAll">Reset all data</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="intro">
+      <p><strong>Soft & cozy money diary:</strong> Plan daily savings or payments, set a monthly goal, and watch your progress bloom—gently and stress-free.</p>
+      <p><strong>Tip:</strong> Enter amounts for each day and a short note if you like. Monthly totals update instantly and your data stays saved on your device.</p>
+    </section>
+
+    <div id="months"></div>
+  </main>
+
+  <footer>
+    Made with pastel care for Gen—keep saving, keep smiling 🌸
+  </footer>
+
+  <script>
+    /* =========================
+       Gen’s Planner ✨ 2026
+       ========================= */
+
+    const YEAR = 2026;
+    const MONTH_NAMES = [
+      "January","February","March","April","May","June",
+      "July","August","September","October","November","December"
+    ];
+    const WEEKDAY_NAMES = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+
+    /* ---------- Storage Helpers ---------- */
+    const storageKey = (monthIndex) => `gens-planner-2026-month-${monthIndex}`;
+    const readMonthData = (monthIndex) => {
+      const raw = localStorage.getItem(storageKey(monthIndex));
+      if (!raw) return { budget: 0, days: {} };
+      try { return JSON.parse(raw); } catch { return { budget: 0, days: {} }; }
+    };
+    const writeMonthData = (monthIndex, data) => {
+      localStorage.setItem(storageKey(monthIndex), JSON.stringify(data));
+    };
+    const resetAllData = () => {
+      for (let m = 0; m < 12; m++) localStorage.removeItem(storageKey(m));
+    };
+
+    /* ---------- Calendar Utilities ---------- */
+    function daysInMonth(year, monthIndex) {
+      return new Date(year, monthIndex + 1, 0).getDate();
+    }
+    function firstWeekday(year, monthIndex) {
+      return new Date(year, monthIndex, 1).getDay(); // 0=Sun
+    }
+
+    /* ---------- DOM Builders ---------- */
+    function createMonthSection(monthIndex) {
+      const monthName = MONTH_NAMES[monthIndex];
+      const section = document.createElement("section");
+      section.className = "month";
+      section.dataset.monthIndex = monthIndex;
+
+      /* Header */
+      const header = document.createElement("div");
+      header.className = "month-header";
+
+      const titleWrap = document.createElement("div");
+      titleWrap.className = "month-title";
+      const h2 = document.createElement("h2");
+      h2.textContent = monthName;
+      const badge = document.createElement("span");
+      badge.className = "month-badge";
+      badge.textContent = `Goal & totals`;
+      titleWrap.appendChild(h2);
+      titleWrap.appendChild(badge);
+
+      const toggleBtn = document.createElement("button");
+      toggleBtn.className = "btn";
+      toggleBtn.textContent = "Collapse";
+      toggleBtn.addEventListener("click", () => {
+        const isCollapsed = section.classList.toggle("collapsed");
+        toggleBtn.textContent = isCollapsed ? "Expand" : "Collapse";
+      });
+
+      header.appendChild(titleWrap);
+      header.appendChild(toggleBtn);
+
+      /* Calendar */
+      const calendar = document.createElement("div");
+      calendar.className = "calendar";
+
+      const weekdayRow = document.createElement("div");
+      weekdayRow.className = "weekday-row";
+      WEEKDAY_NAMES.forEach(w => {
+        const wd = document.createElement("div");
+        wd.className = "weekday";
+        wd.textContent = w;
+        weekdayRow.appendChild(wd);
+      });
+
+      const grid = document.createElement("div");
+      grid.className = "grid";
+
+      const totalDays = daysInMonth(YEAR, monthIndex);
+      const startOffset = firstWeekday(YEAR, monthIndex);
+
+      // Fill leading inactive cells
+      for (let i = 0; i < startOffset; i++) {
+        const cell = document.createElement("div");
+        cell.className = "day inactive";
+        grid.appendChild(cell);
+      }
+
+      // Day cells
+      for (let day = 1; day <= totalDays; day++) {
+        const cell = document.createElement("div");
+        cell.className = "day";
+        cell.dataset.day = day;
+
+        const dateBadge = document.createElement("span");
+        dateBadge.className = "date";
+        dateBadge.textContent = day;
+
+        const inputRow = document.createElement("div");
+        inputRow.className = "input-row";
+
+        const amount = document.createElement("input");
+        amount.type = "number";
+        amount.min = "0";
+        amount.step = "0.01";
+        amount.placeholder = "Amount (₱)";
+        amount.className = "amount";
+
+        const note = document.createElement("input");
+        note.type = "text";
+        note.placeholder = "Note (optional)";
+        note.maxLength = 40;
+        note.className = "note";
+
+        inputRow.appendChild(amount);
+        inputRow.appendChild(note);
+
+        cell.appendChild(dateBadge);
+        cell.appendChild(inputRow);
+        grid.appendChild(cell);
+      }
+
+      /* Planner */
+      const planner = document.createElement("div");
+      planner.className = "planner";
+
+      const leftCard = document.createElement("div");
+      leftCard.className = "planner-card";
+      const leftTitle = document.createElement("h3");
+      leftTitle.textContent = "Monthly planner";
+      leftCard.appendChild(leftTitle);
+
+      const row1 = document.createElement("div");
+      row1.className = "planner-row";
+      const budgetLabel = document.createElement("div");
+      budgetLabel.className = "label";
+      budgetLabel.textContent = "Monthly saving goal (₱)";
+      const budgetInput = document.createElement("input");
+      budgetInput.type = "number";
+      budgetInput.min = "0";
+      budgetInput.step = "0.01";
+      budgetInput.placeholder = "e.g., 10000";
+      budgetInput.className = "planner-input";
+      row1.appendChild(budgetLabel);
+      row1.appendChild(budgetInput);
+
+      const row2 = document.createElement("div");
+      row2.className = "planner-row";
+      const totalLabel = document.createElement("div");
+      totalLabel.className = "label";
+      totalLabel.textContent = "Total saved/paid this month (₱)";
+      const totalValue = document.createElement("div");
+      totalValue.className = "value";
+      totalValue.textContent = "₱0.00";
+      row2.appendChild(totalLabel);
+      row2.appendChild(totalValue);
+
+      const row3 = document.createElement("div");
+      row3.className = "planner-row";
+      const remainLabel = document.createElement("div");
+      remainLabel.className = "label";
+      remainLabel.textContent = "Remaining spendable (₱)";
+      const remainValue = document.createElement("div");
+      remainValue.className = "value";
+      remainValue.textContent = "₱0.00";
+      row3.appendChild(remainLabel);
+      row3.appendChild(remainValue);
+
+      const progressWrap = document.createElement("div");
+      progressWrap.className = "progress-wrap";
+      const progressBar = document.createElement("div");
+      progressBar.className = "progress-bar";
+      const progressFill = document.createElement("div");
+      progressFill.className = "progress-fill";
+      progressBar.appendChild(progressFill);
+      const progressText = document.createElement("div");
+      progressText.className = "progress-text";
+      progressText.textContent = "0% of goal";
+
+      const warnMsg = document.createElement("div");
+      warnMsg.className = "message warn";
+      warnMsg.textContent = "Soft note: You’ve exceeded your monthly goal—consider adjusting or celebrating a bigger save next month.";
+
+      const successMsg = document.createElement("div");
+      successMsg.className = "message success";
+      successMsg.textContent = "Goal reached—beautiful work! 🎉 Keep the momentum going.";
+
+      progressWrap.appendChild(progressBar);
+      progressWrap.appendChild(progressText);
+      leftCard.appendChild(row1);
+      leftCard.appendChild(row2);
+      leftCard.appendChild(row3);
+      leftCard.appendChild(progressWrap);
+      leftCard.appendChild(warnMsg);
+      leftCard.appendChild(successMsg);
+
+      const rightCard = document.createElement("div");
+      rightCard.className = "planner-card";
+      const rightTitle = document.createElement("h3");
+      rightTitle.textContent = "Notes & reflections";
+      const tips = document.createElement("p");
+      tips.style.color = "var(--muted)";
+      tips.textContent = "Write a gentle reminder or a monthly reflection here. Small steps add up.";
+      rightCard.appendChild(rightTitle);
+      rightCard.appendChild(tips);
+
+      planner.appendChild(leftCard);
+      planner.appendChild(rightCard);
+
+      /* Assemble */
+      section.appendChild(header);
+      section.appendChild(calendar);
+      calendar.appendChild(weekdayRow);
+      calendar.appendChild(grid);
+      section.appendChild(planner);
+
+      /* Attach logic */
+      attachMonthLogic({
+        section, monthIndex, budgetInput, totalValue, remainValue,
+        progressFill, progressText, warnMsg, successMsg
+      });
+
+      return section;
+    }
+
+    /* ---------- Logic & Realtime Updates ---------- */
+    function attachMonthLogic(ctx) {
+      const {
+        section, monthIndex, budgetInput, totalValue, remainValue,
+        progressFill, progressText, warnMsg, successMsg
+      } = ctx;
+
+      // Load existing data
+      const data = readMonthData(monthIndex);
+      budgetInput.value = data.budget || 0;
+
+      // Populate day inputs
+      const dayCells = section.querySelectorAll(".day:not(.inactive)");
+      dayCells.forEach(cell => {
+        const day = Number(cell.dataset.day);
+        const amountInput = cell.querySelector(".amount");
+        const noteInput = cell.querySelector(".note");
+        const saved = data.days?.[day]?.amount ?? "";
+        const note = data.days?.[day]?.note ?? "";
+        amountInput.value = saved;
+        noteInput.value = note;
+
+        amountInput.addEventListener("input", () => {
+          const val = parseFloat(amountInput.value || "0");
+          setDayData(monthIndex, day, { amount: isNaN(val) ? 0 : val, note: noteInput.value });
+          recalcMonth(monthIndex, section, budgetInput, totalValue, remainValue, progressFill, progressText, warnMsg, successMsg);
+        });
+        noteInput.addEventListener("input", () => {
+          const val = parseFloat(amountInput.value || "0");
+          setDayData(monthIndex, day, { amount: isNaN(val) ? 0 : val, note: noteInput.value });
+          // Note change doesn’t affect totals—no recalculation needed
+        });
+      });
+
+      // Budget input
+      budgetInput.addEventListener("input", () => {
+        const val = parseFloat(budgetInput.value || "0");
+        const safe = isNaN(val) ? 0 : Math.max(0, val);
+        budgetInput.value = safe;
+        const d = readMonthData(monthIndex);
+        d.budget = safe;
+        writeMonthData(monthIndex, d);
+        recalcMonth(monthIndex, section, budgetInput, totalValue, remainValue, progressFill, progressText, warnMsg, successMsg);
+      });
+
+      // Initial calc
+      recalcMonth(monthIndex, section, budgetInput, totalValue, remainValue, progressFill, progressText, warnMsg, successMsg);
+    }
+
+    function setDayData(monthIndex, day, payload) {
+      const d = readMonthData(monthIndex);
+      if (!d.days) d.days = {};
+      d.days[day] = { amount: payload.amount || 0, note: payload.note || "" };
+      writeMonthData(monthIndex, d);
+    }
+
+    function recalcMonth(monthIndex, section, budgetInput, totalValue, remainValue, progressFill, progressText, warnMsg, successMsg) {
+      const d = readMonthData(monthIndex);
+      const budget = parseFloat(d.budget || 0);
+      let total = 0;
+
+      const dayCells = section.querySelectorAll(".day:not(.inactive)");
+      dayCells.forEach(cell => {
+        const amountInput = cell.querySelector(".amount");
+        const val = parseFloat(amountInput.value || "0");
+        if (!isNaN(val)) total += val;
+      });
+
+      const remaining = budget - total;
+      totalValue.textContent = `₱${formatCurrency(total)}`;
+      remainValue.textContent = `₱${formatCurrency(Math.max(0, remaining))}`;
+
+      // Progress
+      const pct = budget > 0 ? Math.min(100, Math.round((total / budget) * 100)) : 0;
+      progressFill.style.width = `${pct}%`;
+      progressText.textContent = `${pct}% of goal`;
+
+      // Messages
+      warnMsg.classList.remove("show");
+      successMsg.classList.remove("show");
+      if (budget > 0 && total > budget) {
+        warnMsg.classList.add("show");
+      } else if (budget > 0 && total >= budget) {
+        successMsg.classList.add("show");
+      }
+    }
+
+    function formatCurrency(n) {
+      return (n || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    /* ---------- Build All Months ---------- */
+    function buildAllMonths() {
+      const mount = document.getElementById("months");
+      MONTH_NAMES.forEach((_, idx) => {
+        const section = createMonthSection(idx);
+        mount.appendChild(section);
+      });
+    }
+
+    /* ---------- Expand/Collapse/Reset ---------- */
+    function expandAll() {
+      document.querySelectorAll(".month").forEach(m => {
+        m.classList.remove("collapsed");
+        const btn = m.querySelector(".month-header .btn");
+        if (btn) btn.textContent = "Collapse";
+      });
+    }
+    function collapseAll() {
+      document.querySelectorAll(".month").forEach(m => {
+        m.classList.add("collapsed");
+        const btn = m.querySelector(".month-header .btn");
+        if (btn) btn.textContent = "Expand";
+      });
+    }
+    function resetAll() {
+      const ok = confirm("Reset all saved data for 2026? This cannot be undone.");
+      if (!ok) return;
+      resetAllData();
+      // Rebuild UI to clear inputs
+      const mount = document.getElementById("months");
+      mount.innerHTML = "";
+      buildAllMonths();
+    }
+
+    /* ---------- Collapsed Style ---------- */
+    const style = document.createElement("style");
+    style.textContent = `
+      .month.collapsed .calendar,
+      .month.collapsed .planner { display: none; }
+    `;
+    document.head.appendChild(style);
+
+    /* ---------- Init ---------- */
+    buildAllMonths();
+    document.getElementById("expandAll").addEventListener("click", expandAll);
+    document.getElementById("collapseAll").addEventListener("click", collapseAll);
+    document.getElementById("resetAll").addEventListener("click", resetAll);
+  </script>
+</body>
+</html>
